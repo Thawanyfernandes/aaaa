@@ -1,0 +1,109 @@
+Questão 1, versão concorrente da queque
+// Variáveis globais
+
+n = 1000
+mutex = new Sem(1)
+full = new Sem(n)
+empty = new Sem(0)
+buffer = new Buffer(n)
+
+Queue{
+   void queue(int value) {
+       full.wait()
+       mutex.wait()
+       buffer.add(value)
+       mutex.signal()
+       empty.signal()
+   }
+
+   int dequeue() {
+       empty.wait()
+       mutex.wait()
+       value = buffer.get()
+       mutex.signal()
+       full.signal()
+       process(value)       
+   }
+}
+
+Questão 2 controle de concorrencia utilizando somente semaforos 
+Semaphore mutex = 1         
+Semaphore writeLock = 1   
+Semaphore turnstile = 1
+int readers = 0             
+
+func safe_getValue(key string) string {
+    turnstile.wait()
+    turnstile.signal()
+
+    mutex.wait()
+    readers = readers + 1
+    if (readers == 1) {
+        // Primeiro leitor bloqueia escritores
+        writeLock.wait()
+    }
+    mutex.signal()
+
+    // Executa a operação real
+    string value = getValue(key)
+
+    mutex.wait()
+    readers = readers - 1
+    if (readers == 0) {
+        // Último leitor libera escritores
+        writeLock.signal()
+    }
+    mutex.signal()
+
+    return value
+}
+
+func safe_putValue(key string, new_value string) {
+    // Fecha a catraca dos leitores
+    turnstile.wait()
+
+    // Escritor precisa de exclusão total
+    writeLock.wait()
+    putValue(key, new_value)
+    writeLock.signal()
+
+    // Libera a catraca 
+    turnstile.signal()
+}
+Questão  3
+// Variáveis globais
+int provider_index = +∞
+int menor = +∞
+mutex = new Sem(1)
+done = new Sem(0)
+int cont = 0
+
+func void worker(index, url, route)
+    p = price(url, route)
+
+    mutex.wait()
+        if p < menor:
+            menor = p
+            provider_index = index
+        cont++
+
+        if cont == threshold
+            done.signal()
+
+    mutex.signal()
+}
+
+int main(String args[]) {
+
+    route = args[0]
+    providers_total = length(args) - 1
+
+    threshold = ceil(providers_total / 2)
+
+    for i in 0 to providers_total-1
+        url = args[i+1]
+        create_thread(worker, i, url, route)
+
+    done.wait()
+    return provider_index
+}
