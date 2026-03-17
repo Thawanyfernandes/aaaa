@@ -1,0 +1,86 @@
+Questão 1 
+// Variáveis Globais
+Semaphore mutex(1); 
+Semaphore sem_externo(0); // Começa em 0 para ninguém passar sem permissão
+
+func void externalRoute (Request req) {
+    sem_externo.wait(); // Espera a "ficha" liberada pela interna
+    
+    // Se handle() precisar de exclusão mútua entre as externas:
+    mutex.wait();
+    handle(); 
+    mutex.signal(); // CORREÇÃO: aqui deve ser signal e não wait
+}
+
+func void internalRoute (Request req) {
+    // A interna executa handle
+    handle(); 
+
+    // E libera as 4 fichas para as externas [cite: 9]
+    for (int i = 0; i < 4; i++) {
+        sem_externo.signal(); 
+    }
+}
+Questão 2 
+Semaphore mutex = new Semaphore(1);      // Exclusão mútua para a fila
+Semaphore itens = new Semaphore(0);      // Quantidade de itens disponíveis
+Semaphore vagas;                         // Espaços vazios (inicializado no construtor)
+
+new BufferedQueue (int capacity) {
+    this.capacity = capacity;
+    this.queue = new LinkedList<>();
+    this.vagas = new Semaphore(capacity); // Começa com o tamanho total [cite: 30]
+}
+void enqueue(T item) {
+    vagas.wait();          // 1. Espera ter uma vaga livre
+    mutex.wait();          // 2. Bloqueia o acesso para outras threads
+    
+    queue.add(item);       // 3. Região Crítica: Adiciona o item [cite: 43]
+    
+    mutex.signal();        // 4. Libera o acesso
+    itens.signal();        // 5. Avisa aos consumidores que há um novo item
+}
+T dequeue() {
+    itens.wait();          // 1. Espera ter pelo menos um item disponível
+    mutex.wait();          // 2. Bloqueia o acesso exclusivo
+    
+    T item = queue.poll(); // 3. Região Crítica: Remove o primeiro [cite: 38]
+    
+    mutex.signal();        // 4. Libera o acesso
+    vagas.signal();        // 5. Avisa aos produtores que uma vaga abriu
+    
+    return item;           // 6. Retorna o item removido [cite: 39]
+}
+Questão 3 
+void wrap_write(data d) {
+    mutex_E.wait();
+    e_count++;
+    if (e_count == 1) read_block.wait(); // O primeiro escritor "tranca o portão" para novos leitores
+    mutex_E.signal();
+
+    resource.wait();   // Espera sua vez de escrever (exclusividade total)
+    write(d);          // Operação de escrita
+    resource.signal(); // Libera para o próximo (escritor ou leitor)
+
+    mutex_E.wait();
+    e_count--;
+    if (e_count == 0) read_block.signal(); // O último escritor "abre o portão" para os leitores
+    mutex_E.signal();
+}
+data wrap_read() {
+    read_block.wait();   // Tenta passar pelo portão (se um escritor estiver esperando, aqui ele trava)
+    mutex_L.wait();
+    l_count++;
+    if (l_count == 1) resource.wait(); // O primeiro leitor bloqueia o recurso contra escritores
+    mutex_L.signal();
+    read_block.signal(); // Libera o portão para o próximo leitor passar
+
+    data d = read();     // Operação de leitura simultânea
+
+    mutex_L.wait();
+    l_count--;
+    if (l_count == 0) resource.signal(); // O último leitor libera o recurso para escritores
+    mutex_L.signal();
+    
+    return d;
+}
