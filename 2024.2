@@ -1,0 +1,162 @@
+Questão 1 
+N
+void foo
+int rand()
+sleep(int s)
+create_thread(func, args)
+semaphore () 
+wait()
+sinal()
+
+
+global count = 0;
+global min = -1 
+global max = -1
+global mutex = semaphore (1);
+main (n)
+create_thread(foo, )
+finished.wait ();
+print (max);
+print (min);
+
+void foo ()
+num = rand();
+mutex.wait();
+if(min == -1 or num < min)
+  min = num;
+if (max == -1 or num > max)
+  max = num
+mutex.signal();
+sleep(num) 
+mutex.wait();
+count+= 1
+if(count == n)
+finished.signal();
+mutex.signal();
+
+
+
+Questão 2 
+public class Stack {
+
+    private int[] stack;
+    private int ponteiro;
+    private Semaphore mutex;
+    private Semaphore produtor;
+    private Semaphore consumidor;
+    
+    Stack() {
+        this.stack = new int[1000];
+        this.ponteiro = -1;
+        this.mutex = new Semaphore(1);
+        this.produtor = new Semaphore(0);
+        this.consumidor = new Semaphore(1000);
+
+    }
+
+    public boolean isEmpty() {
+        boolean retorno = false;
+        
+        mutex.wait();
+        if (ponteiro == -1) {
+            retorno = true;
+        }
+        mutex.signal();
+
+        return retorno;
+    }
+
+    // Consumidor 
+    public int pop() {
+        produtor.wait();
+        mutex.wait();
+
+          int retorno = stack[ponteiro];
+          ponteiro--;
+
+        mutex.signal();
+  consumidor.signal();
+        return retorno;
+    }
+
+    // Produtor
+    public void push(int value) {
+        consumidor.wait();
+        mutex.wait();
+
+          ponteiro++;
+          stack[ponteiro] = value;
+
+        mutex.signal();
+        produtor.signal();
+    }
+    Questão 3 
+    class Broker {
+    private Request[] requests;
+    private int capacity;
+    private int head = 0, tail = 0;
+    
+    private Semaphore mutex = new Semaphore(1);
+    private Semaphore vagas;  // Controla se o vetor está cheio 
+    private Semaphore itens;  // Controla se há requests disponíveis 
+
+    public Broker(int n) {
+        this.capacity = n;
+        this.requests = new Request[n];
+        this.vagas = new Semaphore(n); // Inicia com N vagas [cite: 84]
+        this.itens = new Semaphore(0); // Inicia com 0 itens
+    }
+
+    public void submitRequest(Request req) {
+        vagas.wait();    // Bloqueia se estiver cheio 
+        mutex.wait();
+        
+        requests[tail] = req;
+        tail = (tail + 1) % capacity;
+        
+        mutex.signal();
+        itens.signal();  // Avisa que há trabalho disponível
+    }
+
+    public Request getWork() {
+        itens.wait();    // Bloqueia se não houver requests 
+        mutex.wait();
+        
+        Request req = requests[head];
+        head = (head + 1) % capacity;
+        
+        mutex.signal();
+        vagas.signal();  // Libera uma vaga no vetor
+        return req;
+    }
+}
+class Worker {
+    private Broker broker;
+
+    public Worker(Broker broker) {
+        this.broker = broker;
+    }
+
+    public void run() {
+        while (true) { // Loop infinito conforme solicitado 
+            Request req = broker.getWork(); // Retira do broker 
+            exec(req);                      // Executa o request 
+        }
+    }
+    
+    // Método exec não precisa ser implementado 
+    private void exec(Request req) { /* ... */ }
+}
+public static void main(String[] args) {
+    int N = 50; // Constante N conhecida [cite: 96]
+    Broker broker = new Broker(N);
+    
+    // Criar 7 threads para executar os workers 
+    for (int i = 0; i < 7; i++) {
+        Worker w = new Worker(broker);
+        create_thread(w.run); // Criação conforme API da prova [cite: 67]
+    }
+    
+    // Opcional: Threads que submetem requests
+    // while(true) { broker.submitRequest(new Request()); }
+}
