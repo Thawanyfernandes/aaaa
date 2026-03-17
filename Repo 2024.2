@@ -1,0 +1,36 @@
+Finished = Semaphore(0)
+mutex = semaphore(1)
+count = 0
+int V
+int n -> tamanho do vetor
+int n -> numero de threads 
+int max_global = -1
+exel(int[] V, int n)
+m=v.LEN
+SLICE M //N
+Start = 0
+end = slice
+
+For (int i = 1; i<= n; i++)
+  cerate_thread(find_max_slice, v, start, end)
+  Start = end
+  end = end+slice
+  if(i == n-1):end = m
+  }
+  finished.wait()
+  return max_global;
+
+  Find_max_slice(int V, int start, int end)
+  int max_local = -1
+  for(int J = start; j < end; j++)
+  if((max_local == -1) or (v[j]> max_local)){
+    max_local = v[j]
+    }}
+    mutex.wait()
+    if((max_global == -1) or (max_local > max_global){
+    max_global = max_local
+    }
+    count = count +1
+    if(count == n)finished.signal()
+    mutex.signal()
+    return max_local;
