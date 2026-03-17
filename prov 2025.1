@@ -1,0 +1,86 @@
+Questão 1  
+N
+void foo
+int rand()
+sleep(int s)
+create_thread(func, args)
+semaphore () 
+wait()
+sinal()
+
+
+global count = 0;
+global min = -1 
+global max = -1
+global mutex = semaphore (1);
+main (n)
+create_thread(foo, )
+finished.wait ();
+print (max);
+print (min);
+
+void foo ()
+num = rand();
+mutex.wait();
+if(min == -1 or num < min)
+  min = num;
+if (max == -1 or num > max)
+  max = num
+mutex.signal();
+sleep(num) 
+mutex.wait();
+count+= 1
+if(count == n)
+finished.signal();
+mutex.signal();
+
+2) Assumindo que o buffer começou cheio e o manage está bloqueado na chamada wait()
+decrementa o semaforo para -1.
+semaphore mutex = new semaforo(1)
+int global_count = m
+semaphore consumer = new semaphore (0)
+semaphore producer = new semaphore (0)
+
+func manage ()
+while(true)
+  producer.wait();
+  create_job (n);
+  global_count = m;
+  consumer.signal();
+
+  func compute(){
+  while(true)
+  mutex.wait();
+  if(Global_count == 0){
+    producer.signal();
+    consumer.wait();
+    }
+    global_count --;
+    job j = get JOB()
+    mutex.signal();
+    exec(j)
+
+    QUESTÃO 3
+    int global_read_count = 0
+    semaforo mutex = new semaphore(1)
+    semaforo roomEmpty = new semaphore(1);
+    func safe_lookup(config_key string){
+    mutex.wait();
+    global_read_count ++;
+    if(global_read_count == 1){
+    roomEmpty.wait();
+    }
+    mutex.signal();
+    lookup(config_key string);
+    mutex.wait();
+    global_read_count --;
+    if(global_read_count == 0){
+      roomEmpty.signal();
+      }
+      mutex.signal();
+      }
+      func safe_update(config_key string, new_value string){
+      roomEmpty.wait();
+      update(config_key string, new_value string);
+      roomEmpty.signal();
+      }
